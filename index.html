@@ -1,0 +1,180 @@
+-- Create the BookStore Database
+CREATE DATABASE BookStore;
+USE BookStore;
+
+-- Table Schema + SQL Commands 
+-- 1. Book 
+ CREATE TABLE book (
+    book_id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255),
+    language_id INT,
+    publisher_id INT,
+    price DECIMAL(8, 2),
+    publication_year YEAR,
+    FOREIGN KEY (language_id) REFERENCES book_language(language_id),
+    FOREIGN KEY (publisher_id) REFERENCES publisher(publisher_id)
+);
+
+-- 2. Book_author 
+CREATE TABLE book_author (
+    book_id INT,
+    author_id INT,
+    PRIMARY KEY (book_id, author_id),
+    FOREIGN KEY (book_id) REFERENCES book(book_id),
+    FOREIGN KEY (author_id) REFERENCES author(author_id)
+);
+
+-- 3. Author 
+CREATE TABLE author (
+    author_id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100)
+);
+
+-- Book_language
+CREATE TABLE book_language (
+    language_id INT AUTO_INCREMENT PRIMARY KEY,
+    language_name VARCHAR(50)
+);
+
+-- 5. Publisher 
+CREATE TABLE publisher (
+    publisher_id INT AUTO_INCREMENT PRIMARY KEY,
+    publisher_name VARCHAR(100)
+);
+
+-- 6. Customer 
+CREATE TABLE customer (
+    customer_id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100),
+    email VARCHAR(100) UNIQUE,
+    phone_number VARCHAR(15)
+);
+
+-- 7. Customer_address 
+CREATE TABLE customer_address (
+    customer_id INT,
+    address_id INT,
+    status_id INT,
+    PRIMARY KEY (customer_id, address_id),
+    FOREIGN KEY (customer_id) REFERENCES customer(customer_id),
+    FOREIGN KEY (address_id) REFERENCES address(address_id),
+    FOREIGN KEY (status_id) REFERENCES address_status(status_id)
+);
+
+-- 8. Address_status 
+CREATE TABLE address_status (
+    status_id INT AUTO_INCREMENT PRIMARY KEY,
+    status_name VARCHAR(50)
+);
+
+-- 9. Address 
+CREATE TABLE address (
+    address_id INT AUTO_INCREMENT PRIMARY KEY,
+    street VARCHAR(255),
+    city VARCHAR(100),
+    country_id INT,
+    FOREIGN KEY (country_id) REFERENCES country(country_id)
+);
+
+-- 10. Country 
+CREATE TABLE country (
+    country_id INT AUTO_INCREMENT PRIMARY KEY,
+    country_name VARCHAR(100)
+);
+
+-- 11.Cust_order 
+CREATE TABLE cust_order (
+    order_id INT AUTO_INCREMENT PRIMARY KEY,
+    customer_id INT,
+    order_date DATE,
+    shipping_method_id INT,
+    order_status_id INT,
+    FOREIGN KEY (customer_id) REFERENCES customer(customer_id),
+    FOREIGN KEY (shipping_method_id) REFERENCES shipping_method(method_id),
+    FOREIGN KEY (order_status_id) REFERENCES order_status(status_id)
+);
+
+-- 12. Order_line 
+CREATE TABLE order_line (
+    order_line_id INT AUTO_INCREMENT PRIMARY KEY,
+    order_id INT,
+    book_id INT,
+    quantity INT,
+    FOREIGN KEY (order_id) REFERENCES cust_order(order_id),
+    FOREIGN KEY (book_id) REFERENCES book(book_id)
+);
+
+-- 13. Shipping_method 
+CREATE TABLE shipping_method (
+    method_id INT AUTO_INCREMENT PRIMARY KEY,
+    method_name VARCHAR(100)
+);
+
+-- 14. Order_history 
+CREATE TABLE order_history (
+    history_id INT AUTO_INCREMENT PRIMARY KEY,
+    order_id INT,
+    status_id INT,
+    change_date DATE,
+    FOREIGN KEY (order_id) REFERENCES cust_order(order_id),
+    FOREIGN KEY (status_id) REFERENCES order_status(status_id)
+);
+
+-- 15. Order_status 
+CREATE TABLE order_status (
+    status_id INT AUTO_INCREMENT PRIMARY KEY,
+    status_name VARCHAR(50)
+);
+
+
+-- Create roles for each user
+-- Carlos(Admin)
+CREATE ROLE 'role_wonder';
+CREATE ROLE 'role_enock';
+CREATE ROLE 'role_metrine';
+
+-- Grant Permissons to each role
+-- Carlos
+GRANT SELECT, INSERT, UPDATE ON BookStore.book TO 'role_carlos';
+GRANT SELECT, INSERT, UPDATE ON BookStore.book_author TO 'role_carlos';
+GRANT SELECT, INSERT, UPDATE ON BookStore.author TO 'role_carlos';
+GRANT SELECT, INSERT, UPDATE ON BookStore.book_language TO 'role_carlos';
+
+-- Wonder
+GRANT SELECT, INSERT, UPDATE ON BookStore.publisher TO 'role_wonder';
+GRANT SELECT, INSERT, UPDATE ON BookStore.customer TO 'role_wonder';
+GRANT SELECT, INSERT, UPDATE ON BookStore.customer_address TO 'role_wonder';
+GRANT SELECT, INSERT, UPDATE ON BookStore.address_status TO 'role_wonder';
+
+-- Enock
+GRANT SELECT, INSERT, UPDATE ON BookStore.address TO 'role_enock';
+GRANT SELECT, INSERT, UPDATE ON BookStore.country TO 'role_enock';
+GRANT SELECT, INSERT, UPDATE ON BookStore.cust_order TO 'role_enock';
+GRANT SELECT, INSERT, UPDATE ON BookStore.order_line TO 'role_enock';
+
+-- Metrine
+GRANT SELECT, INSERT, UPDATE ON BookStore.shipping_method TO 'role_metrine';
+GRANT SELECT, INSERT, UPDATE ON BookStore.order_history TO 'role_metrine';
+GRANT SELECT, INSERT, UPDATE ON BookStore.order_status TO 'role_metrine';
+
+-- Create users and assign roles
+-- Admin user (Carlos with full access)
+CREATE USER 'Carlos'@'localhost' IDENTIFIED BY '1234';
+GRANT ALL PRIVILEGES ON BookStore.* TO 'Carlos'@'localhost';
+
+-- Wonder
+CREATE USER 'Wonder'@'localhost' IDENTIFIED BY '4321';
+GRANT 'role_wonder' TO 'Wonder'@'localhost';
+
+-- Enock
+CREATE USER 'Enock'@'localhost' IDENTIFIED BY '5678';
+GRANT 'role_enock' TO 'Enock'@'localhost';
+
+-- Metrine
+CREATE USER 'Metrine'@'localhost' IDENTIFIED BY '8765';
+GRANT 'role_metrine' TO 'Metrine'@'localhost';
+
+
+
+
+
